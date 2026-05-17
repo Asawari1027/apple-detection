@@ -20,7 +20,7 @@ st.set_page_config(
 st.title("🍎 Apple Detection and Yield Prediction")
 st.write(
     "Upload one or more orchard images. "
-    "The model will detect apples and estimate the total yield."
+    "The model will detect apples, estimate yield, and calculate revenue in Indian Rupees (₹)."
 )
 
 
@@ -29,7 +29,7 @@ def load_model():
     """Download best.pt from Google Drive if needed and load YOLO model."""
     if not os.path.exists(MODEL_PATH):
         url = f"https://drive.google.com/uc?id={MODEL_FILE_ID}"
-        with st.spinner("Downloading model from Google Drive..."):
+        with st.spinner("Downloading model from Google Drive..."): 
             gdown.download(url, MODEL_PATH, quiet=False)
 
     return YOLO(MODEL_PATH)
@@ -47,6 +47,7 @@ uploaded_files = st.file_uploader(
 
 if uploaded_files:
     total_apples = 0
+    image_counts = []  # List of tuples: (filename, apple_count)
 
     for idx, uploaded_file in enumerate(uploaded_files, start=1):
         # Read image
@@ -60,50 +61,4 @@ if uploaded_files:
         # Run detection
         results = model(temp_path)
 
-        # Count detections
-        apple_count = len(results[0].boxes)
-        total_apples += apple_count
-
-        # Get annotated image
-        result_image = results[0].plot()
-
-        # Display results
-        st.subheader(f"Image {idx}: {uploaded_file.name}")
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.image(
-                image,
-                caption="Original Image",
-                use_container_width=True
-            )
-
-        with col2:
-            st.image(
-                result_image,
-                caption=f"Detected Apples: {apple_count}",
-                use_container_width=True
-            )
-
-        st.info(f"🍎 Apples detected in this image: {apple_count}")
-        st.divider()
-
-        # Clean up temporary file
-        if os.path.exists(temp_path):
-            os.remove(temp_path)
-
-    # Total yield summary
-    st.success(f"🌳 Total Estimated Yield: {total_apples} apples")
-
-    average_weight = st.number_input(
-        "Average weight per apple (grams)",
-        min_value=1,
-        value=180
-    )
-
-    total_weight_kg = (total_apples * average_weight) / 1000
-
-    st.metric(
-        "Estimated Total Weight",
-        f"{total_weight_kg:.2f} kg"
-    )
+        st.metric("Total Revenue", f"₹{total_revenue:,.2f}")
