@@ -29,7 +29,7 @@ def load_model():
     """Download best.pt from Google Drive if needed and load YOLO model."""
     if not os.path.exists(MODEL_PATH):
         url = f"https://drive.google.com/uc?id={MODEL_FILE_ID}"
-        with st.spinner("Downloading model from Google Drive..."): 
+        with st.spinner("Downloading model from Google Drive..."):
             gdown.download(url, MODEL_PATH, quiet=False)
 
     return YOLO(MODEL_PATH)
@@ -56,9 +56,4 @@ if uploaded_files:
         # Save temporarily for YOLO inference
         with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp:
             image.save(tmp.name)
-            temp_path = tmp.name
-
-        # Run detection
-        results = model(temp_path)
-
         st.metric("Total Revenue", f"₹{total_revenue:,.2f}")
